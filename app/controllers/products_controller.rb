@@ -1,28 +1,38 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: [:show, :edit, :update, :destroy]
 
-  # GET /products
-  # GET /products.json
+  # /products
+  # /products.json?producer=&page=1
   def index
-    @products = Product.all
+    if params[:producer].present?
+      @producer = params[:producer]
+      @products = Product.where(producer: @producer).paginate(:page => params[:page])
+    else
+      @products = Product.paginate(:page => params[:page])
+    end
   end
 
-  # GET /products/1
-  # GET /products/1.json
+  # /products/update_from_csv
+  def update_from_csv
+    # this action performs the import function manually
+    t_start = Time.now
+    Product.transaction do
+      Product.update_from_csv()
+    end
+    t_end = Time.now
+    render text: "Done in #{t_end - t_start} secs"
+  end
+
   def show
   end
 
-  # GET /products/new
   def new
     @product = Product.new
   end
 
-  # GET /products/1/edit
   def edit
   end
 
-  # POST /products
-  # POST /products.json
   def create
     @product = Product.new(product_params)
 
@@ -37,8 +47,6 @@ class ProductsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /products/1
-  # PATCH/PUT /products/1.json
   def update
     respond_to do |format|
       if @product.update(product_params)
@@ -51,8 +59,6 @@ class ProductsController < ApplicationController
     end
   end
 
-  # DELETE /products/1
-  # DELETE /products/1.json
   def destroy
     @product.destroy
     respond_to do |format|

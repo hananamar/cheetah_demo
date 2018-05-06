@@ -27,4 +27,6 @@ ActiveRecord::Schema.define(version: 20180506101300) do
     t.datetime "updated_at", null: false
   end
 
+  add_index "products", ["sku"], name: "index_products_on_sku", using: :btree
+
 end
