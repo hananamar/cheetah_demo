@@ -4,12 +4,8 @@ class ProductsController < ApplicationController
   # /products
   # /products.json?producer=&page=1
   def index
-    if params[:producer].present?
-      @producer = params[:producer]
-      @products = Product.where(producer: @producer).paginate(:page => params[:page])
-    else
-      @products = Product.paginate(:page => params[:page])
-    end
+    @producer = params[:producer]
+    @products = Product.where(producer: @producer).paginate(:page => params[:page])
   end
 
   # /products/update_from_csv
