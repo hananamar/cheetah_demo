@@ -16,13 +16,14 @@ class ProductsController < ApplicationController
   def update_from_csv
     # this action performs the import function manually
     t_start = Time.now
-    Product.transaction do
-      Product.update_from_csv()
-    end
+    Product.update_from_csv()
     t_end = Time.now
     render text: "Done in #{t_end - t_start} secs"
   end
 
+
+
+# not relevent for the challenge
   def show
   end
 

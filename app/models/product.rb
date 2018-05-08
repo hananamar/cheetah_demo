@@ -13,24 +13,28 @@ class Product < ActiveRecord::Base
 
   self.per_page = 30
 
-  def self.update_from_csv
+  # Class methods
+  def self.update_from_csv(path: CSV_FILE_PATH)
     require 'csv'
-    # csv_text = File.read(CSV_FILE_PATH)
-    csv_text = File.read(TEST_CSV_FILE_PATH)
+    csv_text = File.read(path)
     csv = CSV.parse(csv_text, :headers => true)
-    csv.each do |row|
-      my_create_or_update(row.to_hash)
+
+    transaction do
+      csv.each do |row|
+        product_hash = row_to_product_hash(row)
+        find_or_create_product(product_hash) unless product_hash[:sku].nil?
+      end
     end
   end
 
-  def self.my_create_or_update(csv_row_hash)
+  def self.row_to_product_hash(row)
     # create a hash that can be sent to update_attributes method
-    product_hash = ATTRS_TO_HEADERS.each_with_object({}){|(k,v),h| h[k] = csv_row_hash[v] }
+    ATTRS_TO_HEADERS.each_with_object({}){|(k,v), h| h[k] = row.to_hash[v] || '' }
+  end
 
-    # find or create, then update attrs
-    unless product_hash[:sku].nil?
-      product = find_or_create_by(sku: product_hash[:sku])
-      product.update_attributes!(product_hash)
-    end
+  def self.find_or_create_product(hash)
+    # find or create, then update attributes
+    # (seemed better to make ~10k queries than to eager-load to memory ~10k product models)
+    find_or_create_by(sku: hash[:sku]).update_attributes!(hash)
   end
 end
