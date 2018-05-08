@@ -18,11 +18,16 @@ class Product < ActiveRecord::Base
     require 'csv'
     csv_text = File.read(path)
     csv = CSV.parse(csv_text, :headers => true)
+    sku_hash = csv.each_with_object({}){|row, h| h[row[ATTRS_TO_HEADERS[:sku]]] = row_to_product_hash(row)}
 
     transaction do
-      csv.each do |row|
-        product_hash = row_to_product_hash(row)
-        find_or_create_product(product_hash) unless product_hash[:sku].nil?
+      existing_products = Product.where(sku: sku_hash.keys).all
+      existing_products.each do |product|
+        product.update_attributes!(sku_hash.delete(product.sku)) # update attributes and remove from sku_hash
+      end
+
+      sku_hash.each do |sku, product_hash|
+        create!(product_hash) unless sku.nil?
       end
     end
   end
@@ -32,9 +37,9 @@ class Product < ActiveRecord::Base
     ATTRS_TO_HEADERS.each_with_object({}){|(k,v), h| h[k] = row.to_hash[v] || '' }
   end
 
-  def self.find_or_create_product(hash)
-    # find or create, then update attributes
-    # (seemed better to make ~10k queries than to eager-load to memory ~10k product models)
-    find_or_create_by(sku: hash[:sku]).update_attributes!(hash)
-  end
+## decided this was too much
+  # def self.find_or_create_product(hash)
+  #   # find or create, then update attributes
+  #   find_or_create_by(sku: hash[:sku]).update_attributes!(hash)
+  # end
 end

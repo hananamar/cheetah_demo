@@ -32,26 +32,26 @@ describe Product, '.row_to_product_hash' do
   end
 end
 
-describe Product, '.find_or_create_product' do
-  it 'finds existing product or creates it, based on sku' do
-    expect(Product.count).to eq 0 # start with no products
-
-    Product.find_or_create_product(TEST_HASH_1) # create test product 1
-    expect(Product.count).to eq 1
-    expect(Product.first.try(:barcode)).to eq '76069500000'
-
-    Product.find_or_create_product(TEST_HASH_1.dup.tap{|h| h[:barcode] = '111'}) # update test product 1
-    expect(Product.count).to eq 1
-    expect(Product.first.try(:barcode)).to eq '111'
-
-    Product.find_or_create_product(TEST_HASH_1.dup.tap{|h| h[:sku] = '222'}) # create test product 1 (altered)
-    expect(Product.count).to eq 2
-
-    Product.find_or_create_product(TEST_HASH_1.dup.tap{|h| h[:barcode] = '333'}) # update test product 1 again
-    expect(Product.count).to eq 2
-    expect(Product.first.try(:barcode)).to eq '333'
-  end
-end
+# describe Product, '.find_or_create_product' do
+#   it 'finds existing product or creates it, based on sku' do
+#     expect(Product.count).to eq 0 # start with no products
+#
+#     Product.find_or_create_product(TEST_HASH_1) # create test product 1
+#     expect(Product.count).to eq 1
+#     expect(Product.first.try(:barcode)).to eq '76069500000'
+#
+#     Product.find_or_create_product(TEST_HASH_1.dup.tap{|h| h[:barcode] = '111'}) # update test product 1
+#     expect(Product.count).to eq 1
+#     expect(Product.first.try(:barcode)).to eq '111'
+#
+#     Product.find_or_create_product(TEST_HASH_1.dup.tap{|h| h[:sku] = '222'}) # create test product 1 (altered)
+#     expect(Product.count).to eq 2
+#
+#     Product.find_or_create_product(TEST_HASH_1.dup.tap{|h| h[:barcode] = '333'}) # update test product 1 again
+#     expect(Product.count).to eq 2
+#     expect(Product.first.try(:barcode)).to eq '333'
+#   end
+# end
 
 describe Product, '.update_from_csv' do
   it 'updates database according to csv file' do
